@@ -127,9 +127,4 @@ Copy `frontend/.env.example` → `frontend/.env` and fill in:
 | `GET /health` | Model readiness check |
 | `GET /docs` | Swagger UI |
 
----
 
-## 👤 Author
-
-**Saumyajeet** — Weather Module  
-TechVortex IIITG · April 2026
