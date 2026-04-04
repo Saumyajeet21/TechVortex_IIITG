@@ -16,6 +16,41 @@ const WEATHER_ICONS = {
   95:'⛈',96:'⛈',99:'⛈',
 };
 
+// Night icons for clear/partly-cloudy conditions
+const NIGHT_ICONS = { 0:'🌙', 1:'🌙', 2:'🌑' };
+
+/**
+ * Returns true if a UTC time string ("YYYY-MM-DDTHH:MM") is nighttime in IST.
+ * Night = before 06:00 IST or after 19:00 IST.
+ */
+function isNight(timeUTC) {
+  if (!timeUTC) return false;
+  const d = new Date(timeUTC + ':00Z');
+  // Convert to IST (UTC+5:30)
+  const istMinutes = d.getUTCHours() * 60 + d.getUTCMinutes() + 330;
+  const istHour    = Math.floor((istMinutes % 1440) / 60);
+  return istHour >= 19 || istHour < 6;
+}
+
+/** Returns the correct day/night icon for a weathercode + UTC time string. */
+function getIcon(weathercode, timeUTC) {
+  const code = weathercode ?? 0;
+  if (isNight(timeUTC) && NIGHT_ICONS[code] !== undefined) {
+    return NIGHT_ICONS[code];
+  }
+  return WEATHER_ICONS[code] ?? '🌡';
+}
+
+/** Convert UTC time string to IST display string "HH:MM" */
+function toISTShort(timeUTC) {
+  if (!timeUTC) return '--:--';
+  const d = new Date(timeUTC + ':00Z');
+  const totMin = d.getUTCHours() * 60 + d.getUTCMinutes() + 330; // +5h30m
+  const h = Math.floor((totMin % 1440) / 60);
+  const m = totMin % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
 function getAdvice(temp, weathercode) {
   const isRain = [51,53,55,61,63,65,80,81,82,95,96,99].includes(weathercode);
   const isSnow = [71,73,75].includes(weathercode);
@@ -153,7 +188,7 @@ export default function AIForecastPanel({ selectedCity }) {
     return {
       label:   d === 0 ? 'Today' : d === 1 ? 'Tomorrow'
                : date.toLocaleDateString('en-IN',{ weekday:'short',month:'short',day:'numeric'}),
-      data:    slice.map(h => ({ ...h, timeShort: h.time?.slice(11,16) ?? '' })),
+      data:    slice.map(h => ({ ...h, timeShort: toISTShort(h.time) })),
       maxTemp: Math.max(...slice.map(h => h.temperature)),
       minTemp: Math.min(...slice.map(h => h.temperature)),
     };
@@ -227,11 +262,11 @@ export default function AIForecastPanel({ selectedCity }) {
       {/* Premium Hour Timeline */}
       <div className="timeline-wrap">
         <div className="timeline-label">
-          🕐 Explore Hour:&nbsp;
-          <strong style={{ color: '#38bdf8' }}>{selectedHour.timeShort || '--:--'}</strong>
+           🕐 Explore Hour:&nbsp;
+          <strong style={{ color: '#38bdf8' }}>{selectedHour.timeShort || '--:--'} IST</strong>
           <span style={{ color: '#94a3b8', marginLeft: 8, fontSize: '0.78rem' }}>
             → {temp.toFixed(1)}°C &nbsp;
-            {WEATHER_ICONS[wcode] ?? '🌡'} {getWeatherLabel(wcode)}
+            {getIcon(wcode, selectedHour.time)} {getWeatherLabel(wcode)}
           </span>
         </div>
 
@@ -252,7 +287,7 @@ export default function AIForecastPanel({ selectedCity }) {
                 onClick={() => setHourIdx(i)}
               >
                 <span className="tl-time">{h.timeShort}</span>
-                <span className="tl-icon">{WEATHER_ICONS[h.weathercode ?? 0] ?? '🌡'}</span>
+                <span className="tl-icon">{getIcon(h.weathercode ?? 0, h.time)}</span>
                 <div className="tl-bar-track">
                   <div className="tl-bar-fill" style={{ height: `${barPct}%` }} />
                 </div>

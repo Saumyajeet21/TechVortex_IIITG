@@ -1,12 +1,13 @@
 """
-train_lstm.py  (scikit-learn MLP — improved with cyclic time features)
+train_lstm.py  (scikit-learn MLP — improved with seasonal + cyclic time features)
 
-Key fix: Added hour_sin + hour_cos (cyclical encoding) so the model
-KNOWS what time of day each hour is. Also passes future hour signals
-as part of the input so it knows which hour each of 72 predictions is for.
+Features per hour (past window):
+  temperature, precipitation, windspeed, humidity,
+  hour_sin, hour_cos   ← time of day (IST)
+  day_sin,  day_cos    ← day of year (seasonality)
 
-Input shape:  (24 hours × 6 features) + (72 future hour_sin) + (72 future hour_cos)
-             = 144 + 72 + 72 = 288 input features
+Input shape:  (24h × 8 features) + (72 × 4 future signals)
+            = 192 + 288 = 480 input features
 Output shape: 72 hourly temperatures
 """
 
@@ -32,13 +33,16 @@ df = pd.read_csv(DATA_PATH, parse_dates=["datetime"])
 df = df[["datetime"] + FEATURES].dropna().reset_index(drop=True)
 print(f"   {len(df)} hourly records | ~{len(df)//24} days")
 
-# ── Add cyclic time features (KEY FIX) ────────────────────────────────────────
-# sin/cos encoding so the model understands hour 0 and hour 23 are adjacent
+# ── Cyclic time + seasonal features ─────────────────────────────────────────
+# IST hour encoding (data is already in IST from fetch_data.py)
 df["hour_sin"] = np.sin(2 * np.pi * df["datetime"].dt.hour / 24)
 df["hour_cos"] = np.cos(2 * np.pi * df["datetime"].dt.hour / 24)
+# Day-of-year encoding → model knows April ≠ January
+df["day_sin"]  = np.sin(2 * np.pi * df["datetime"].dt.dayofyear / 365)
+df["day_cos"]  = np.cos(2 * np.pi * df["datetime"].dt.dayofyear / 365)
 
-ALL_FEATURES = FEATURES + ["hour_sin", "hour_cos"]   # 6 features per hour
-print(f"   Features: {ALL_FEATURES}")
+ALL_FEATURES = FEATURES + ["hour_sin", "hour_cos", "day_sin", "day_cos"]  # 8 features
+print(f"   Features ({len(ALL_FEATURES)}): {ALL_FEATURES}")
 
 # ── Scale (only the 6 features, NOT the raw hour) ─────────────────────────────
 scaler = MinMaxScaler()
@@ -51,21 +55,29 @@ print("✅ Scaler saved")
 # ── Build sequences ───────────────────────────────────────────────────────────
 def make_sequences(scaled_data, datetimes, lookback, forecast):
     """
-    Input  = flatten(24h × 6 features) + future_hour_sin(72) + future_hour_cos(72)
-           = 144 + 144 = 288 features
+    Input  = flatten(24h × 8 features)
+           + future_hour_sin(72) + future_hour_cos(72)
+           + future_day_sin(72)  + future_day_cos(72)
+           = 192 + 288 = 480 features
     Output = 72 future temperatures (scaled index-0 values)
     """
     X, y = [], []
     for i in range(len(scaled_data) - lookback - forecast):
-        # ── Past window ──────────────────────────────────────────────────────
-        past_flat = scaled_data[i : i + lookback].flatten()   # (144,)
+        # ── Past window (8 features × 24h) ───────────────────────────────────
+        past_flat = scaled_data[i : i + lookback].flatten()   # (192,)
 
-        # ── Future time signals ──────────────────────────────────────────────
-        fut_hours = datetimes.iloc[i + lookback : i + lookback + forecast].dt.hour.values
-        fut_sin   = np.sin(2 * np.pi * fut_hours / 24)        # (72,)
-        fut_cos   = np.cos(2 * np.pi * fut_hours / 24)        # (72,)
+        # ── Future time signals ───────────────────────────────────────────────
+        fut_slice  = datetimes.iloc[i + lookback : i + lookback + forecast]
+        fut_hours  = fut_slice.dt.hour.values          # IST hours (0-23)
+        fut_days   = fut_slice.dt.dayofyear.values     # day of year (1-365)
 
-        X.append(np.concatenate([past_flat, fut_sin, fut_cos]))  # (288,)
+        fut_sin_h  = np.sin(2 * np.pi * fut_hours / 24)    # (72,)
+        fut_cos_h  = np.cos(2 * np.pi * fut_hours / 24)    # (72,)
+        fut_sin_d  = np.sin(2 * np.pi * fut_days  / 365)   # (72,)
+        fut_cos_d  = np.cos(2 * np.pi * fut_days  / 365)   # (72,)
+
+        X.append(np.concatenate([past_flat, fut_sin_h, fut_cos_h,
+                                             fut_sin_d, fut_cos_d]))  # (480,)
 
         # ── Target: 72 scaled temperatures ──────────────────────────────────
         target = scaled_data[i + lookback : i + lookback + forecast, 0]  # (72,)

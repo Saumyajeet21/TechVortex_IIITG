@@ -1,117 +1,113 @@
-# 🌤️ Weather Intelligence Dashboard
+# Weather Intelligence Dashboard
 
 > **TechVortex IIITG** — AI-powered climate intelligence dashboard  
 > Team member: **Saumyajeet**
 
-A full-stack weather forecasting system combining an **LSTM (MLPRegressor) neural network** trained on 1 year of hourly Open-Meteo data, **Gemini AI** narrative analysis, an **interactive Leaflet map**, and live **AQI monitoring** — all wrapped in a premium dark-mode UI.
+A full-stack weather forecasting system combining an LSTM (Multi-Layer Perceptron Regressor) neural network trained on 1 year of hourly Open-Meteo data, Gemini AI narrative analysis, an interactive Leaflet map, and live AQI monitoring. The application evaluates its own prediction accuracy in real-time.
 
 ---
 
-## 🚀 Features
+## Features
 
-| Feature | Description |
-|---|---|
-| 🤖 72-Hour LSTM Forecast | Trained on Gwalior data · MAE ~1.9°C · R² ~0.76 |
-| 🧠 Gemini AI Analysis | Narrative forecast, confidence score, weather events & safety advice |
-| 🗺️ Interactive Map | Real-time weather dots with Supabase-backed caching |
-| 🌫️ AQI Monitor | Air quality index with health recommendations |
-| 📡 Per-location Accuracy | Live hindcast accuracy recalculated for every searched city |
-| ⚡ Credit-efficient | Gemini calls cached 6h per city in sessionStorage |
+- **72-Hour AI Forecast**: Trained specifically on Gwalior climate data. Evaluates live models (MAE: ~2.15 C). Uses sine/cosine temporal features to account for diurnal and seasonal variations.
+- **Gemini AI Analysis**: Extracts actionable insights, computes a narrative forecast, and issues confidence scores and safety advice based on raw data inputs.
+- **Interactive Map**: Presents real-time weather nodes using a frontend state management system backed by Supabase caching.
+- **AQI Monitor**: Computes the Air Quality Index and supplies health recommendations based on Indian CPCB guidelines.
+- **Bias Correction**: The backend calculates a dynamic real-time offset by hindcasting past 48 hours to dynamically align predictions with localized, short-term climate anomalies.
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 weather-module/
-├── frontend/          # React + Vite app
+├── frontend/          # React + Vite application
 │   ├── src/
-│   │   ├── components/    # WeatherDashboard, AIForecastPanel, MapView, AQIPanel...
-│   │   ├── hooks/         # useWeatherData (data orchestration)
+│   │   ├── components/    # WeatherDashboard, AIForecastPanel, MapView, AQIPanel
+│   │   ├── hooks/         # useWeatherData (data orchestration and API merging)
 │   │   └── services/      # gemini.js, supabase.js, openmeteo.js
-│   ├── .env.example       # Copy → .env and fill in your keys
+│   ├── .env.example       # Example variables for the React build
 │   └── package.json
 │
-└── backend/           # FastAPI + scikit-learn
+└── backend/           # FastAPI + Scikit-Learn
     ├── api/
-    │   ├── forecast_api.py      # Main API (predict, live-accuracy, Gemini)
-    │   └── gemini_forecast.py   # Server-side Gemini integration
+    │   ├── forecast_api.py      # Main API (predict, live-accuracy)
+    │   └── gemini_forecast.py   # Server-side Gemini AI orchestration
     ├── model/
-    │   ├── train_lstm.py        # Retrain the model
-    │   └── predict.py           # Inference + live accuracy hindcast
+    │   ├── train_lstm.py        # Retrain the MLP model
+    │   └── predict.py           # Inference + live accuracy hindcasting
     ├── data/
-    │   └── fetch_data.py        # Download training data from Open-Meteo
-    ├── .env.example             # Copy → .env and add GEMINI_API_KEY
+    │   └── fetch_data.py        # Script to download training data
+    ├── .env.example             # Backend environment template
     └── requirements.txt
 ```
 
 ---
 
-## ⚙️ Setup
+## Setup Requirements
 
-### Prerequisites
-
-- **Node.js** ≥ 18  
-- **Python** ≥ 3.10  
-- A free [Supabase](https://supabase.com) project  
-- A free [Google AI Studio](https://aistudio.google.com/app/apikey) Gemini API key
+- **Node.js** v18 or higher
+- **Python** v3.10 or higher
+- **Supabase** account (Free tier)
+- **Google AI Studio** Gemini API key (Free tier)
 
 ---
 
-### 1. Backend
+## Installation & Deployment
+
+### 1. Backend Server
 
 ```bash
 cd weather-module/backend
 
-# Install dependencies
+# Install required mathematical and server dependencies
 pip install -r requirements.txt
 
-# Configure environment
+# Configure environment variables
 cp .env.example .env
-# → Open .env and add your GEMINI_API_KEY
+# Edit .env and insert your GEMINI_API_KEY
 
-# Download 1 year of training data (Gwalior)
+# Prepare the data pipeline (Download 1 year of training data for Gwalior)
 python data/fetch_data.py
 
-# Train the LSTM model (~5 min on CPU)
+# Train the Neural Network model on CPU
 python model/train_lstm.py
 
-# Start the API server
+# Launch the FastAPI server
 cd api
 uvicorn forecast_api:app --port 8000
 ```
-
-API is now live at **http://localhost:8000**  
-Docs: **http://localhost:8000/docs**
+*The backend API will be running at http://localhost:8000*  
+*Swagger Documentation available at http://localhost:8000/docs*
 
 ---
 
-### 2. Frontend
+### 2. Frontend React Client
 
 ```bash
 cd weather-module/frontend
 
-# Install dependencies
+# Install node dependencies
 npm install
 
-# Configure environment
+# Configure environment keys
 cp .env.example .env
-# → Open .env and fill in:
-#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
-#   VITE_GEMINI_API_KEY
-#   VITE_FORECAST_API_URL=http://localhost:8000
+# Open the .env file and define:
+# VITE_SUPABASE_URL
+# VITE_SUPABASE_ANON_KEY
+# VITE_GEMINI_API_KEY
+# VITE_FORECAST_API_URL=http://localhost:8000
 
-# Start development server
+# Start the Vite development server
 npm run dev
 ```
-
-App is now live at **http://localhost:5173**
+*The application will initialize at http://localhost:5173*
 
 ---
 
-### 3. Supabase Table (optional — for map caching)
+### 3. Supabase Schema (For Map Caching)
 
-Run this SQL in your Supabase project's SQL editor:
+Deploy the following SQL schema in your Supabase project's SQL editor to enable distributed caching:
 
 ```sql
 create table weather_snapshots (
@@ -130,20 +126,10 @@ create table weather_snapshots (
 
 ---
 
-## 🔑 API Keys Needed
+## Technical Stack
 
-| Key | Where to get |
-|---|---|
-| `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` | [supabase.com](https://supabase.com) → Project Settings → API |
-| `VITE_GEMINI_API_KEY` / `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
-| `VITE_OWM_API_KEY` | Optional — [openweathermap.org](https://openweathermap.org/api) free tier |
-
----
-
-## 🛠️ Tech Stack
-
-**Frontend:** React 18, Vite, Recharts, Leaflet, Lucide React  
-**Backend:** FastAPI, scikit-learn (MLPRegressor), Uvicorn  
-**AI:** Google Gemini 2.0 Flash Lite  
-**Data:** Open-Meteo API (free, no key required)  
-**Database:** Supabase (PostgreSQL)  
+**Frontend Layer:** React 18, Vite, Recharts, Leaflet, Lucide React  
+**Backend Layer:** Python, FastAPI, Scikit-Learn (MLPRegressor), Numpy, Uvicorn  
+**Artificial Intelligence:** Google Gemini 2.0 Flash Lite  
+**Data Infrastructure:** Open-Meteo API (High-resolution numerical models)  
+**Database Persistence:** Supabase (PostgreSQL)

@@ -145,9 +145,10 @@ export async function fetchCurrentWeather(lat, lon) {
     hourly: 'temperature_2m,precipitation,windspeed_10m,relative_humidity_2m',
     forecast_days: 3,
     timezone: 'auto',
+    _t: Math.floor(Date.now() / 60000), // cache-bust: changes every minute
   });
 
-  const res = await fetch(`${BASE_URL}?${params}`);
+  const res = await fetch(`${BASE_URL}?${params}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('OpenMeteo fetch failed');
   return res.json();
 }

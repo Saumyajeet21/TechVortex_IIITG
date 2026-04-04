@@ -74,11 +74,22 @@ export default function WeatherDashboard() {
           <div className="logo">🌦 WeatherAI</div>
           <div className="header-meta">
             <span>AI-Driven Climate Intelligence</span>
-            {lastUpdated && (
-              <span className="last-updated">
-                Updated: {lastUpdated.toLocaleTimeString('en-IN')}
-              </span>
-            )}
+            <span className="last-updated" style={{ display:'flex', alignItems:'center', gap:6 }}>
+              {lastUpdated && `Updated: ${lastUpdated.toLocaleTimeString('en-IN')}`}
+              <button
+                onClick={refresh}
+                disabled={loading}
+                title="Refresh now"
+                style={{
+                  background:'rgba(99,102,241,0.2)', border:'1px solid rgba(99,102,241,0.4)',
+                  borderRadius:6, color:'#a5b4fc', cursor:loading?'not-allowed':'pointer',
+                  fontSize:'0.85rem', padding:'2px 8px', lineHeight:'1.4',
+                  opacity: loading ? 0.5 : 1, transition:'all 0.2s',
+                }}
+              >
+                {loading ? '⟳ ...' : '🔄 Refresh'}
+              </button>
+            </span>
           </div>
         </div>
 

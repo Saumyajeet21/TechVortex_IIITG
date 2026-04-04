@@ -3,7 +3,7 @@ import { fetchCurrentWeather, fetchCurrentWeatherOWM, CITIES } from '../services
 import { saveWeatherSnapshot, getLatestSnapshots } from '../services/supabase';
 
 const MAP_REFRESH_MS  = 15 * 60 * 1000;  // map dots refresh every 15 min
-const MAIN_REFRESH_MS = 60 * 60 * 1000;  // main card refreshes every 60 min
+const MAIN_REFRESH_MS =  5 * 60 * 1000;  // main card refreshes every 5 min
 
 export function useWeatherData() {
   const [weatherMap, setWeatherMap]       = useState({});
@@ -110,24 +110,27 @@ export function useWeatherData() {
     setLoading(true);
     setError(null);
     try {
-      // Current conditions: OWM first, fallback to Open-Meteo
-      let cur;
+      // Current conditions: Open-Meteo first (accurate, live model data)
+      // OWM used only to enrich the weather description text
+      const omData = await fetchCurrentWeather(selectedCity.lat, selectedCity.lon);
+      const c = omData.current;
+      let cur = {
+        temperature:   Math.round(c.temperature_2m * 10) / 10,
+        feelsLike:     Math.round(c.apparent_temperature * 10) / 10,
+        windspeed:     Math.round(c.windspeed_10m * 10) / 10,
+        precipitation: c.precipitation,
+        weathercode:   c.weathercode,
+        humidity:      c.relative_humidity_2m,
+        description:   null,
+        time:          c.time,
+      };
+
+      // Try to enrich description from OWM (non-blocking)
       try {
-        cur = await fetchCurrentWeatherOWM(selectedCity.lat, selectedCity.lon);
-      } catch {
-        const data = await fetchCurrentWeather(selectedCity.lat, selectedCity.lon);
-        const c = data.current;
-        cur = {
-          temperature:   c.temperature_2m,
-          feelsLike:     c.apparent_temperature,
-          windspeed:     c.windspeed_10m,
-          precipitation: c.precipitation,
-          weathercode:   c.weathercode,
-          humidity:      c.relative_humidity_2m,
-          description:   null,
-          time:          c.time,
-        };
-      }
+        const owm = await fetchCurrentWeatherOWM(selectedCity.lat, selectedCity.lon);
+        cur.description = owm.description; // only take the text label from OWM
+      } catch { /* OWM failed — Open-Meteo weathercode label will be used */ }
+
       setCurrentWeather(cur);
 
       // Hourly chart data from Open-Meteo
