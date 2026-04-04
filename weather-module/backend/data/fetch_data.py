@@ -16,9 +16,9 @@ retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
 openmeteo = openmeteo_requests.Client(session=retry_session)
 
 # ── Parameters ──────────────────────────────────────────────────────────────
-# Using Guwahati as primary training location (your city)
-LATITUDE  = 26.1445
-LONGITUDE = 91.7362
+# Gwalior as primary training location
+LATITUDE  = 26.2183
+LONGITUDE = 78.1828
 START     = "2024-01-01"
 END       = "2024-12-31"
 

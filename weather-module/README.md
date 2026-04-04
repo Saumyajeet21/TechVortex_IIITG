@@ -1,8 +1,9 @@
-# 🌦 WeatherAI — AI-Driven Climate Intelligence Module
+# 🌤️ Weather Intelligence Dashboard
 
-> **Team:** TechVortex IIITG | **Branch:** `Saumyajeet` | **Module:** Weather
+> **TechVortex IIITG** — AI-powered climate intelligence dashboard  
+> Team member: **Saumyajeet**
 
-A real-time weather intelligence dashboard powered by an LSTM neural network, featuring live station data, interactive maps, and 72-hour AI-generated forecasts for Indian cities.
+A full-stack weather forecasting system combining an **LSTM (MLPRegressor) neural network** trained on 1 year of hourly Open-Meteo data, **Gemini AI** narrative analysis, an **interactive Leaflet map**, and live **AQI monitoring** — all wrapped in a premium dark-mode UI.
 
 ---
 
@@ -10,121 +11,139 @@ A real-time weather intelligence dashboard powered by an LSTM neural network, fe
 
 | Feature | Description |
 |---|---|
-| 📡 **Live Weather** | Real-time data from OpenWeatherMap (station-accurate) |
-| 🗺 **Interactive Map** | Leaflet map with temperature-coded city markers |
-| 📊 **Weather Charts** | 24hr temperature, precipitation, wind & humidity graphs |
-| 🤖 **AI Forecast** | 72-hour prediction using custom-trained MLP neural network |
-| 🔔 **Smart Alerts** | Real-time notifications for extreme weather events |
-| 🗄 **Data Persistence** | Hourly snapshots saved to Supabase PostgreSQL |
+| 🤖 72-Hour LSTM Forecast | Trained on Gwalior data · MAE ~1.9°C · R² ~0.76 |
+| 🧠 Gemini AI Analysis | Narrative forecast, confidence score, weather events & safety advice |
+| 🗺️ Interactive Map | Real-time weather dots with Supabase-backed caching |
+| 🌫️ AQI Monitor | Air quality index with health recommendations |
+| 📡 Per-location Accuracy | Live hindcast accuracy recalculated for every searched city |
+| ⚡ Credit-efficient | Gemini calls cached 6h per city in sessionStorage |
 
 ---
 
-## 🏗 Architecture
+## 🗂️ Project Structure
 
 ```
 weather-module/
-├── frontend/               ← React + Vite dashboard
-│   └── src/
-│       ├── components/     ← WeatherMap, Charts, ForecastPanel, etc.
-│       ├── services/       ← OpenMeteo, OpenWeatherMap, Supabase APIs
-│       └── hooks/          ← useWeatherData (polling + state)
-└── ml-model/               ← Python ML pipeline
-    ├── data/fetch_data.py  ← Downloads 1yr historical data (OpenMeteo Archive)
+├── frontend/          # React + Vite app
+│   ├── src/
+│   │   ├── components/    # WeatherDashboard, AIForecastPanel, MapView, AQIPanel...
+│   │   ├── hooks/         # useWeatherData (data orchestration)
+│   │   └── services/      # gemini.js, supabase.js, openmeteo.js
+│   ├── .env.example       # Copy → .env and fill in your keys
+│   └── package.json
+│
+└── backend/           # FastAPI + scikit-learn
+    ├── api/
+    │   ├── forecast_api.py      # Main API (predict, live-accuracy, Gemini)
+    │   └── gemini_forecast.py   # Server-side Gemini integration
     ├── model/
-    │   ├── train_lstm.py   ← Trains MLP neural network (sklearn)
-    │   └── predict.py      ← Generates 72hr forecast
-    └── api/forecast_api.py ← FastAPI server serving predictions
+    │   ├── train_lstm.py        # Retrain the model
+    │   └── predict.py           # Inference + live accuracy hindcast
+    ├── data/
+    │   └── fetch_data.py        # Download training data from Open-Meteo
+    ├── .env.example             # Copy → .env and add GEMINI_API_KEY
+    └── requirements.txt
 ```
 
 ---
 
-## ⚙️ Tech Stack
+## ⚙️ Setup
 
-**Frontend:** React 18, Vite, Recharts, Leaflet, react-hot-toast, Supabase JS  
-**ML Model:** Python 3.11, scikit-learn (MLPRegressor), pandas, numpy  
-**API Server:** FastAPI, Uvicorn  
-**Data Sources:** OpenWeatherMap (current), Open-Meteo (hourly/archive), Supabase
+### Prerequisites
+
+- **Node.js** ≥ 18  
+- **Python** ≥ 3.10  
+- A free [Supabase](https://supabase.com) project  
+- A free [Google AI Studio](https://aistudio.google.com/app/apikey) Gemini API key
 
 ---
 
-## 🔧 Setup & Run
-
-### 1. Frontend
+### 1. Backend
 
 ```bash
-cd weather-module/frontend
-npm install
-
-# Copy and fill in environment variables
-cp .env.example .env
-# Edit .env with your API keys (see Environment Variables table below)
-
-npm run dev
-# → http://localhost:5173
-```
-
-### 2. ML Model + FastAPI
-
-```bash
-cd weather-module/ml-model
+cd weather-module/backend
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Step 1: Download training data (1 year historical)
+# Configure environment
+cp .env.example .env
+# → Open .env and add your GEMINI_API_KEY
+
+# Download 1 year of training data (Gwalior)
 python data/fetch_data.py
 
-# Step 2: Train the model (~2-5 min)
+# Train the LSTM model (~5 min on CPU)
 python model/train_lstm.py
 
-# Step 3: Start prediction API
+# Start the API server
 cd api
-uvicorn forecast_api:app --reload --port 8000
-# → http://localhost:8000/docs
+uvicorn forecast_api:app --port 8000
 ```
 
-### 3. Supabase (Database)
+API is now live at **http://localhost:8000**  
+Docs: **http://localhost:8000/docs**
 
-Run in your Supabase SQL Editor:
+---
+
+### 2. Frontend
+
+```bash
+cd weather-module/frontend
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# → Open .env and fill in:
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+#   VITE_GEMINI_API_KEY
+#   VITE_FORECAST_API_URL=http://localhost:8000
+
+# Start development server
+npm run dev
+```
+
+App is now live at **http://localhost:5173**
+
+---
+
+### 3. Supabase Table (optional — for map caching)
+
+Run this SQL in your Supabase project's SQL editor:
 
 ```sql
-CREATE TABLE IF NOT EXISTS weather_snapshots (
-  id BIGSERIAL PRIMARY KEY, location TEXT,
-  latitude FLOAT, longitude FLOAT,
-  temperature FLOAT, windspeed FLOAT,
-  precipitation FLOAT, weathercode INT,
-  humidity FLOAT, fetched_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS weather_forecasts (
-  id BIGSERIAL PRIMARY KEY, location TEXT,
-  forecast_generated_at TIMESTAMPTZ DEFAULT NOW(),
-  forecast_data JSONB
+create table weather_snapshots (
+  id          bigserial primary key,
+  lat         float not null,
+  lon         float not null,
+  city_name   text,
+  temperature float,
+  humidity    int,
+  windspeed   float,
+  weathercode int,
+  aqi         int,
+  recorded_at timestamptz default now()
 );
 ```
 
 ---
 
-## 🔑 Environment Variables
+## 🔑 API Keys Needed
 
-Copy `frontend/.env.example` → `frontend/.env` and fill in:
-
-| Variable | Description | Where to get it |
-|---|---|---|
-| `VITE_SUPABASE_URL` | Supabase project URL | supabase.com → Project Settings → API |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key | supabase.com → Project Settings → API |
-| `VITE_OWM_API_KEY` | OpenWeatherMap key | openweathermap.org/api (free tier) |
-| `VITE_FORECAST_API_URL` | FastAPI server URL | `http://localhost:8000` (local) |
+| Key | Where to get |
+|---|---|
+| `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` | [supabase.com](https://supabase.com) → Project Settings → API |
+| `VITE_GEMINI_API_KEY` / `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
+| `VITE_OWM_API_KEY` | Optional — [openweathermap.org](https://openweathermap.org/api) free tier |
 
 ---
 
-## 📡 API Endpoints
+## 🛠️ Tech Stack
 
-| Endpoint | Description |
-|---|---|
-| `GET /` | API status |
-| `GET /predict?lat=26.14&lon=91.74` | 72-hour temperature forecast |
-| `GET /health` | Model readiness check |
-| `GET /docs` | Swagger UI |
-
-
+**Frontend:** React 18, Vite, Recharts, Leaflet, Lucide React  
+**Backend:** FastAPI, scikit-learn (MLPRegressor), Uvicorn  
+**AI:** Google Gemini 2.0 Flash Lite  
+**Data:** Open-Meteo API (free, no key required)  
+**Database:** Supabase (PostgreSQL)  

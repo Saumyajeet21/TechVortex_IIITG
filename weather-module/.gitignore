@@ -1,17 +1,22 @@
-# Dependencies
+# ── Node / Frontend ─────────────────────────────
 node_modules/
 dist/
-.env
-.env.local
-.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
 
-# Model artifacts & cache
-*.h5
-*.keras
-*.pkl
+# ── Python / Backend ─────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
-data/*.csv
-saved_model/
+*.h5
+*.keras
+*.pkl
+backend/.env
+backend/data/*.csv
+backend/model/saved_model/
+backend/.cache.sqlite
+
+# ── General ──────────────────────────────────────
 .cache/
+.DS_Store
