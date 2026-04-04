@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pycache
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables (SECRETS — never commit)
+.env
+.env.*
+!.env.example
+
+# Model cache (auto-generated on startup)
+models/*.pkl
+
+# Zone cache (auto-populated by scheduler)
+data/zone_cache/
+data/mock_predictions.json
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

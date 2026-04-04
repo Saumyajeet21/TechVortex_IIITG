@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #060d1a;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #e2e8f0;
+}
+
+/* ── Typography matching the design ─────────────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glassmorphism card — dark navy style ───────────────────────────────────── */
+.glass-card {
+  background: rgba(13, 21, 38, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(13, 21, 38, 0.95);
+  border-color: rgba(0, 212, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 212, 255, 0.12);
+}
+
+/* ── Stat card ──────────────────────────────────────────────────────────────── */
+.stat-card {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.07) 0%, rgba(6, 13, 26, 0.95) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 0.875rem;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 212, 255, 0.1);
+}
+
+/* ── Progress bar ───────────────────────────────────────────────────────────── */
+.progress-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ── Glow risk levels ───────────────────────────────────────────────────────── */
+.glow-high   { box-shadow: 0 0 24px rgba(239, 68, 68, 0.35); }
+.glow-medium { box-shadow: 0 0 24px rgba(245, 158, 11, 0.35); }
+.glow-low    { box-shadow: 0 0 24px rgba(0, 255, 136, 0.25); }
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #060d1a; }
+::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.5); }
+
+/* ── Slider override ─────────────────────────────────────────────────────────── */
+[data-radix-slider-thumb] {
+  width: 18px !important;
+  height: 18px !important;
+  background: #00d4ff !important;
+  border: 2px solid #060d1a !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.6) !important;
+}
+
+[data-radix-slider-track] {
+  height: 5px !important;
+  background: rgba(255,255,255,0.08) !important;
+  border-radius: 3px !important;
+}
+
+[data-radix-slider-range] {
+  background: linear-gradient(90deg, #00d4ff, #00ff88) !important;
+  border-radius: 3px !important;
+}
+
+/* ── Number counter ──────────────────────────────────────────────────────────── */
+.damage-number {
+  font-variant-numeric: tabular-nums;
+  font-family: 'Space Grotesk', monospace;
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
+/* ── Animated ocean background ───────────────────────────────────────────────── */
+.ocean-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 75%, rgba(0, 255, 136, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(6, 13, 50, 0.4) 0%, transparent 70%),
+    linear-gradient(180deg, #060d1a 0%, #08101e 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Tag/badge pills ─────────────────────────────────────────────────────────── */
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  background: rgba(0, 212, 255, 0.08);
+  color: #00d4ff;
+}
+
+/* ── AI explanation card ─────────────────────────────────────────────────────── */
+.ai-card {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.06) 0%, rgba(0, 255, 136, 0.04) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-left: 3px solid #00d4ff;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+/* ── Improvement suggestion card ─────────────────────────────────────────────── */
+.suggestion-card {
+  background: rgba(13, 21, 38, 0.9);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-left: 3px solid #00ff88;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.suggestion-card:hover {
+  border-color: rgba(0, 255, 136, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 255, 136, 0.1);
+}
+
+/* ── Priority badge ──────────────────────────────────────────────────────────── */
+.priority-high   { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+.priority-medium { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+.priority-low    { background: rgba(0,255,136,0.1); color: #34d399; border: 1px solid rgba(0,255,136,0.25); }
+
+/* ── Animated pulse for live indicator ───────────────────────────────────────── */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+.animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+
+/* ── Input fields ────────────────────────────────────────────────────────────── */
+.ocean-input {
+  background: rgba(6, 13, 26, 0.8);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 0.5rem;
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s;
+}
+
+.ocean-input:focus {
+  outline: none;
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.ocean-input::placeholder { color: rgba(148, 163, 184, 0.5); }
+
+/* ── CTA button ──────────────────────────────────────────────────────────────── */
+.btn-ocean {
+  background: linear-gradient(135deg, #0099cc 0%, #00d4ff 50%, #00ff88 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+  border: none;
+  border-radius: 0.625rem;
+  color: #060d1a;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.btn-ocean:hover { opacity: 0.92; transform: translateY(-1px); }
+.btn-ocean:active { transform: translateY(0); }
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

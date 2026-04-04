@@ -1,0 +1,26 @@
+# Environment variables (SECRETS)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+.next/
+out/
+
+# Virtual environment
+venv/
+.venv/
+
+# Model cache
+backend/models/*.pkl
+backend/data/zone_cache/
+
+# OS
+.DS_Store
+Thumbs.db
