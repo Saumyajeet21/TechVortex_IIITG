@@ -1,0 +1,72 @@
+export const safetyCards = [
+  { id: 'cyclone', cls: 'cyclone', icon: '🌀', title: 'Cyclones & Storms', tag: 'High Risk · Coastal Areas' },
+  { id: 'waves', cls: 'waves', icon: '🌊', title: 'High Waves & Strong Winds', tag: 'Moderate–High Risk · Beaches' },
+  { id: 'pollution', cls: 'pollution', icon: '💨', title: 'Pollution & Poor Air Quality', tag: 'Moderate Risk · Urban Coasts' },
+  { id: 'tourism', cls: 'tourism', icon: '🏖️', title: 'Coastal Travel Safety', tag: 'General · All Visitors' },
+];
+
+export const safetyDetails = {
+  cyclone: {
+    title: '🌀 Cyclones & Severe Storms',
+    titleColor: '#9b59b6',
+    badge: '⚠️ HIGH RISK',
+    badgeCls: 'risk-high',
+    intro: "A cyclone is an intense tropical storm with strong rotating winds and heavy rainfall, formed over warm ocean waters. Cyclones bring dangerous storm surges, extreme winds, torrential rain, and flooding. India's east coast states face the highest risk.",
+    actions: [
+      'Monitor official updates from IMD (imd.gov.in) — sign up for SMS alerts or use the Mausam mobile app.',
+      'Evacuate immediately if authorities issue evacuation orders. Move to the nearest government cyclone shelter.',
+      'Secure your home — tie down or bring in anything that could become a projectile. Board up windows. Turn off electrical mains and gas supply before leaving.',
+      'Prepare an emergency kit: 72+ hours of food and water, first aid kit, flashlight, important documents in a waterproof bag, mobile phone with power bank, and essential medications.',
+      'Stay away from coastal areas, rivers, and low-lying areas during and after the storm.',
+      'After the storm, wait for official all-clear before returning. Watch for downed power lines, contaminated water, and unstable structures.',
+    ],
+    dyk: { label: '📞 Emergency Contacts', text: 'Call 112 (National Emergency Number) or 1078 (NDMA Helpline) for immediate assistance.' },
+  },
+  waves: {
+    title: '🌊 High Waves & Strong Winds',
+    titleColor: '#2e86c1',
+    badge: '⚡ MODERATE–HIGH RISK',
+    badgeCls: 'risk-med',
+    intro: 'High waves and rip currents are among the most dangerous beach hazards. Rip currents are strong, narrow channels of fast-moving water flowing away from shore — they can reach speeds of 2.5 meters per second, faster than Olympic swimmers.',
+    actions: [
+      'Always check INCOIS wave forecast (incois.gov.in) and local beach conditions before visiting. Look for posted warning flags — red flags mean no swimming.',
+      'Never swim alone. Always swim in areas patrolled by lifeguards and stay within designated safe swimming zones.',
+      'If caught in a rip current: DO NOT swim against it. Swim parallel to the shore until you escape the current\'s pull, then swim diagonally back to shore.',
+      'Never turn your back on the ocean — an unexpectedly large "sneaker wave" can knock you down without warning.',
+      'Avoid rocky coastlines, jetties, and piers during rough conditions.',
+      'If a boat is caught in rough seas: ensure all passengers wear life jackets and issue a Mayday call on VHF Channel 16 if in danger.',
+    ],
+    dyk: { label: '💡 Key Fact', text: 'Rip currents account for over 80% of lifeguard rescues at beaches. Learning to identify and escape them is one of the most important water safety skills you can develop.' },
+  },
+  pollution: {
+    title: '💨 Pollution & Poor Air/Water Quality',
+    titleColor: '#b7770d',
+    badge: '⚡ MODERATE RISK',
+    badgeCls: 'risk-med',
+    intro: 'Coastal communities face unique pollution risks from sea and land sources. Oil spills, sewage discharge, industrial effluents, and algal blooms can create serious health hazards.',
+    actions: [
+      'Monitor Air Quality Index (AQI) at safar.tropmet.res.in or the SAFAR mobile app. Avoid outdoor activities when AQI exceeds 150. Wear N95 masks when AQI exceeds 200.',
+      'Do not swim in water that shows signs of algal blooms — discolored water, foam on the surface, or fish kills nearby are warning signs.',
+      'Do not consume seafood from waters near industrial discharge points, sewage outfalls, or after major flooding events.',
+      'If you witness illegal dumping or oil spills, report it immediately to the Coast Guard (1554), CPCB, or your State Pollution Control Board.',
+      'During dust storms: stay indoors, seal doors and windows, keep a supply of drinking water, and protect vulnerable family members with masks.',
+    ],
+    dyk: null,
+  },
+  tourism: {
+    title: '🏖️ Coastal Travel & Tourism Safety',
+    titleColor: '#1e8449',
+    badge: '✓ GENERAL SAFETY',
+    badgeCls: 'risk-low',
+    intro: 'Coastal tourism is a wonderful experience — but unfamiliar environments, unpredictable weather, and marine hazards require preparation and awareness.',
+    actions: [
+      'Research your destination before you go. Check weather forecasts (imd.gov.in), tide tables, and any travel advisories. Know the local emergency numbers and nearest hospital.',
+      'Sun safety is critical — apply broad-spectrum SPF 30+ sunscreen every 2 hours, wear a hat and UV-protective clothing, and avoid peak sun hours (11am–3pm).',
+      'If engaging in water sports, only use licensed, certified operators. Always wear appropriate safety equipment. Verify that your travel insurance covers adventure water sports.',
+      'On boat trips, ensure the vessel has adequate life jackets for all passengers, the crew holds valid certificates, and you have checked the weather forecast.',
+      'Respect marine ecosystems — do not collect shells, coral, or other marine organisms. Do not feed marine animals.',
+      'Carry sufficient cash, a charged phone, emergency contacts, and photocopies of your ID. Download offline maps before traveling to remote coastal areas.',
+    ],
+    dyk: { label: '💡 Pro Tip', text: 'Download the INCOIS Ocean Forecast app before coastal visits — it provides real-time information on wave heights, currents, and sea surface temperature.' },
+  },
+};

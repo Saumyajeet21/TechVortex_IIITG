@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 from groq import Groq
 import requests
 import os
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:3001"])
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY")
@@ -132,4 +134,4 @@ def get_response():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=5000, use_reloader=False)

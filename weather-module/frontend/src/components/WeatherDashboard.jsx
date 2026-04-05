@@ -14,7 +14,7 @@ const WEATHER_ICONS = {
   80: '🌦', 81: '🌧', 82: '⛈', 95: '⛈', 96: '⛈', 99: '⛈',
 };
 
-export default function WeatherDashboard() {
+export default function WeatherDashboard({ onBack }) {
   const {
     currentWeather, hourlyData, weatherMap,
     selectedCity, setSelectedCity,
@@ -71,6 +71,13 @@ export default function WeatherDashboard() {
       {/* Header */}
       <header className="dashboard-header">
         <div className="header-left">
+          {onBack && (
+            <button onClick={onBack} style={{
+              background: 'none', border: 'none', color: '#64748b',
+              cursor: 'pointer', fontSize: '0.8rem', marginRight: 8, padding: '4px 8px',
+              borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4,
+            }}>← Home</button>
+          )}
           <div className="logo">🌦 WeatherAI</div>
           <div className="header-meta">
             <span>AI-Driven Climate Intelligence</span>
@@ -183,7 +190,7 @@ export default function WeatherDashboard() {
 
       {error && <div className="error-banner">⚠️ {error} — Using cached data</div>}
 
-      {/* Tab navigation — 3 tabs only */}
+      {/* Tab navigation — 3 tabs */}
       <div className="tab-nav">
         {[
           { id: 'overview',  label: '📊 Overview & Map'  },
