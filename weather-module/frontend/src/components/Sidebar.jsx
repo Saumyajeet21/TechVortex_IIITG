@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 
 // ── SVG Icons (stroke-based, clean) ───────────────────────────────────────
 function Ico({ d, d2, size = 16, color = 'currentColor' }) {
@@ -65,7 +66,12 @@ function NavItem({ item, active, onClick }) {
 }
 
 // ── Sidebar Component ──────────────────────────────────────────────────────
-export default function Sidebar({ currentPage, onNavigate, user }) {
+export default function Sidebar({ currentPage, onNavigate, user, onLogout }) {
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    localStorage.removeItem('climateiq_user');
+    if (onLogout) onLogout();
+  }
   return (
     <aside style={{
       width: 216, flexShrink: 0,
@@ -140,10 +146,30 @@ export default function Sidebar({ currentPage, onNavigate, user }) {
               }}>
                 {user.name}
               </div>
-              <div style={{ fontSize: '0.62rem', color: '#374151', marginTop: 1 }}>
-                {user.phone}
+              <div style={{ fontSize: '0.62rem', color: '#4b5563', marginTop: 1,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.email || user.phone || ''}
               </div>
             </div>
+            {/* Logout button */}
+            <button onClick={handleLogout} title="Sign out"
+              style={{
+                marginLeft: 'auto', flexShrink: 0,
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: '4px', borderRadius: 5,
+                color: '#4b5563', fontSize: '0.65rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'color 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
+              onMouseLeave={e => e.currentTarget.style.color = '#4b5563'}>
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
         )}
 

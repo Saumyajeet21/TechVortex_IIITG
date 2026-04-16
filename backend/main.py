@@ -15,6 +15,15 @@ from datetime import datetime, timezone
 
 load_dotenv()
 app = FastAPI()
+
+# ─── Phone normaliser: '+91 98765 43210' → '+917489448616' ───
+def normalize_phone(raw: str) -> str:
+    import re
+    raw = (raw or "").strip()
+    # Keep leading '+', strip everything that isn't a digit
+    has_plus = raw.startswith('+')
+    digits = re.sub(r'[^\d]', '', raw)
+    return ('+' + digits) if has_plus else digits
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # ─── Supabase ───
@@ -605,7 +614,7 @@ async def register(data: dict = Body(...)):
     try:
         supabase.table("surf_users").insert({
             "name":          data.get("full_name"),
-            "phone":         data.get("phone_number"),
+            "phone":         normalize_phone(data.get("phone_number") or ""),
             "location_name": location,
             "lat": lat, "lon": lon,
             "activity_type": activity,
@@ -657,8 +666,9 @@ async def register(data: dict = Body(...)):
     except Exception as e:
         print(f"[WARN] Log insert: {e}")
 
-    phone = (data.get("phone_number") or "").strip()
+    phone = normalize_phone(data.get("phone_number") or "")
     name  = data.get("full_name") or "User"
+    print(f"[Register] Phone normalized: '{(data.get('phone_number') or '').strip()}' -> '{phone}'")
 
     # Open 30-min alert window
     alert_windows[phone] = {
