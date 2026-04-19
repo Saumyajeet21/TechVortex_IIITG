@@ -75,7 +75,7 @@ const FEATURES = [
     glow: 'rgba(6,182,212,0.18)',
     border: 'rgba(6,182,212,0.28)',
     cta: 'Open OceanGuard',
-    badge: ':3000',
+    badge: ':3003',
     delay: 80,
   },
   {
@@ -384,7 +384,7 @@ export default function LandingPage({ onNavigate }) {
           TechVortex IIITG 2026 &middot; Climate &amp; Ocean Intelligence
         </span>
         <div style={{ display: 'flex', gap: 16 }}>
-          {[['Hub',':5173'],['Weather',':8000'],['Ocean AI',':8001'],['SurfSafe',':3000'],['Chatbot',':5000'],['OceanIQ',':3001']].map(([n,p]) => (
+          {[['Hub',':5173'],['Weather',':8000'],['Ocean AI',':8001'],['SurfSafe',':3003'],['Chatbot',':5000'],['OceanIQ',':3001']].map(([n,p]) => (
             <span key={n} style={{ color: '#1e293b', fontSize: '0.65rem' }}>{n}<span style={{ color: '#0f172a' }}>{p}</span></span>
           ))}
         </div>

@@ -24,7 +24,6 @@ TechVortex is a multi-module AI-powered climate intelligence dashboard built by 
 - **Twilio SMS Alerts**: Automated SMS notifications for high-risk coastal zones using Gemini AI verification.
 - **ClimateBot**: Conversational AI powered by Groq's Llama 3.3 70B for climate data queries.
 - **OceanGuard Panel**: Real-time recovery simulation and carbon market pricing.
-- **One-Click Startup**: Launch the entire 8-service stack via a single `.bat` file.
 
 ---
 
@@ -38,7 +37,7 @@ Browser (port 5173) — Central Hub
     |-- Sidebar navigation
     |       |-- Dashboard (AtmoSense weather module)
     |       |-- ClimateBot (Flask chatbot)
-    |       |-- Ocean Risk ML (React CRA, port 3000)
+    |       |-- Ocean Risk ML / Surf Safe AI (React CRA, port 3003)
     |       |-- OceanGuard (React Vite, port 3002)
     |       |-- OceanIQ (React Vite, port 3001)
     |
@@ -54,7 +53,7 @@ Browser (port 5173) — Central Hub
 ## Module Descriptions
 
 ### Central Hub — `weather-module/frontend`
-The main React application that boots at port 5173. Contains the Supabase Auth login page, the global sidebar, and iframe routers. 
+The main React application that boots at port 5173. Contains the Supabase Auth login page, the global sidebar, and iframe routers.
 
 ### AtmoSense — `weather-module`
 A weather intelligence module with real-time atmospheric data. Backend is a FastAPI service calling OpenWeatherMap.
@@ -62,8 +61,8 @@ A weather intelligence module with real-time atmospheric data. Backend is a Fast
 ### ClimateBot — `chatbot`
 A conversational AI assistant powered by Groq's Llama 3.3. Users can ask questions about ocean science and climate topics. Built with Flask.
 
-### Ocean Risk ML — `backend` + `frontend`
-A FastAPI backend handling Twilio SMS alerts, Supabase DB operations, Ocean-Meteo scans, and Gemini AI verification. Frontend runs on port 3000.
+### Ocean Risk ML / Surf Safe AI — `backend` + `frontend`
+A FastAPI backend handling Twilio SMS alerts, Supabase DB operations, Ocean-Meteo scans, and Gemini AI verification. Frontend runs on port **3003**.
 
 ### OceanGuard — `OceanGuard`
 An ocean plastic climate monitoring dashboard. Backend on port 8002 provides endpoints for carbon absorption, plastic source attribution, and economic damage costs. Frontend runs on port 3002.
@@ -100,22 +99,34 @@ The repository contains `.env.example` files in each service directory. Copy the
 
 ## Running the Project
 
-### The Easy Way (Windows One-Click)
-Run the automated batch script to start all 8 services concurrently in minimized terminal windows. Ensure you have installed packages using `npm install` and `pip install` in the respective directories first.
+### Two-Terminal Startup (Recommended)
 
+Open **two separate terminals** in the project root and run one command in each:
+
+**Terminal 1 — All Backends:**
 ```cmd
-start-techvortex.bat
+npm run backend
+```
+Starts: Hub API (:8001) · OceanGuard API (:8002) · Weather API (:8000) · ClimateBot (:5000)
+
+**Terminal 2 — All Frontends:**
+```cmd
+npm run frontend
+```
+Starts: Hub Dashboard (:5173) · Surf Safe AI (:3003) · OceanGuard (:3002) · OceanIQ (:3001)
+
+The **main dashboard at http://localhost:5173** will open automatically in your browser.
+
+### One-Command Startup
+To launch everything in a single terminal:
+```cmd
+npm start
 ```
 
-To stop all services instantly:
+### Stopping All Services
 ```cmd
-stop-techvortex.bat
+npm run stop
 ```
-
-> The script will automatically open the central dashboard `http://localhost:5173` in your default browser.
-
-### The Manual Way
-If you prefer to run services manually, follow the port mappings below and run `npm run dev` / `npm start` for frontends and `uvicorn main:app` / `python app.py` for backends.
 
 ---
 
@@ -124,7 +135,7 @@ If you prefer to run services manually, follow the port mappings below and run `
 | Port | Service | Directory |
 |---|---|---|
 | **5173** | **Central Hub (main entry point)** | `weather-module/frontend` |
-| 3000 | Ocean Risk ML Frontend | `frontend/` |
+| 3003 | Surf Safe AI / Ocean Risk ML Frontend | `frontend/` |
 | 3001 | OceanIQ Learning Hub | `learning hub/ocean-iq/` |
 | 3002 | OceanGuard Frontend | `OceanGuard/frontend/` |
 | 8000 | Weather AI API | `weather-module/backend/api/` |

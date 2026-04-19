@@ -73,7 +73,7 @@ export default function App() {
         {page === 'home'       && <LandingPage onNavigate={handleCardNavigate} />}
         {page === 'weather'    && <WeatherDashboard onBack={() => setPage('home')} />}
         {page === 'chatbot'    && <ChatbotPanel     onBack={() => setPage('home')} />}
-        {page === 'ocean'      && <EmbedView url="http://localhost:3000" />}
+        {page === 'ocean'      && <EmbedView url="http://localhost:3003" />}
         {page === 'oceanguard' && <EmbedView url="http://localhost:3002" />}
         {page === 'learning'   && <EmbedView url="http://localhost:3001" />}
       </main>

@@ -4,7 +4,10 @@
   "private": true,
   "description": "TechVortex IIITG — Climate and Ocean Intelligence Platform",
   "scripts": {
-    "start": "concurrently --kill-others-on-fail -n \"HUB-UI,HUB-API,OG-UI,OG-API,WX-UI,WX-API,CHATBOT,IQ-UI\" -c \"blue.bold,magenta.bold,green.bold,green.dim,yellow.bold,yellow.dim,cyan.bold,white.bold\" \"cd frontend && npm start\" \"cd backend && python -m uvicorn main:app --port 8001\" \"cd OceanGuard/frontend && npm run dev\" \"cd OceanGuard/backend && venv\\Scripts\\python.exe -m uvicorn main:app --port 8002\" \"cd weather-module/frontend && npm run dev\" \"cd weather-module/backend && python -m uvicorn api.forecast_api:app --port 8000\" \"cd chatbot && python app.py\" \"cd \\\"learning hub/ocean-iq\\\" && npm run dev\""
+    "frontend": "concurrently -n \"HUB,SURFSAFE,OCEANGUARD,OCEANIQ\" -c \"blue.bold,cyan.bold,green.bold,white.bold\" \"cd weather-module/frontend && npm run dev\" \"cd frontend && set BROWSER=none&& npm start\" \"cd OceanGuard/frontend && npm run dev\" \"cd \\\"learning hub/ocean-iq\\\" && npm run dev\"",
+    "backend": "concurrently -n \"HUB-API,OG-API,WX-API,CHATBOT\" -c \"magenta.bold,green.bold,yellow.bold,cyan.bold\" \"cd backend && python -m uvicorn main:app --port 8001\" \"cd OceanGuard/backend && .\\\\venv\\\\Scripts\\\\python.exe -m uvicorn main:app --port 8002\" \"cd weather-module/backend/api && python -m uvicorn forecast_api:app --port 8000\" \"cd chatbot && python app.py\"",
+    "start": "concurrently --kill-others-on-fail -n \"BACKEND,FRONTEND\" -c \"magenta.bold,blue.bold\" \"npm run backend\" \"npm run frontend\"",
+    "stop": "powershell -Command \"Get-Process python, node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Host 'All TechVortex services stopped.'\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

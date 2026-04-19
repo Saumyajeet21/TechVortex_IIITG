@@ -137,15 +137,18 @@ def start_scheduler() -> BackgroundScheduler:
     """Initialize and start the background scheduler."""
     scheduler = BackgroundScheduler(timezone="UTC")
 
-    # Refresh every 6 hours — stores to Supabase automatically
+    # Refresh every 3 hours — stores to Supabase automatically
+    # Delay first run by 30s so the server is fully responsive before heavy zone refreshes
+    _start_delay = __import__('datetime').datetime.now(__import__('datetime').timezone.utc) \
+                   + __import__('datetime').timedelta(seconds=30)
     scheduler.add_job(
         refresh_all_zone_data,
         trigger="interval",
         hours=3,
         id="zone_refresh",
         replace_existing=True,
-        next_run_time=__import__('datetime').datetime.now(__import__('datetime').timezone.utc),  # run immediately on startup
+        next_run_time=_start_delay,  # 30s delay → server stays fast on startup
     )
     scheduler.start()
-    logger.info("[Scheduler] Background scheduler started (refresh every 6h, first run: immediate).")
+    logger.info("[Scheduler] Background scheduler started (refresh every 3h, first run: 30s after startup).")
     return scheduler

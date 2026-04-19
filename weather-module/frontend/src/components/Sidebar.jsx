@@ -184,7 +184,7 @@ export default function Sidebar({ currentPage, onNavigate, user, onLogout }) {
           </span>
         </div>
         <div style={{ fontSize: '0.58rem', color: '#1f2937', marginTop: 3 }}>
-          6 services · :5173 :8000 :8001 :5000
+          6 services · :5173 :8000 :8001 :3003 :5000
         </div>
       </div>
     </aside>

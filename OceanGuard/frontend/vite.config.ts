@@ -15,6 +15,7 @@ export default defineConfig({
   },
   server: {
     port: 3002,
+    open: false,   // embedded in hub iframe — do NOT open browser
     headers: {
       'X-Frame-Options': 'ALLOWALL',
       'Content-Security-Policy': "frame-ancestors *",

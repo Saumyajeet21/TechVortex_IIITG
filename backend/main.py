@@ -85,12 +85,12 @@ except Exception:
     print("[INFO] surf_model.pkl not found — using physics formula fallback")
 
 ACTIVITY_MULTIPLIERS = {
-    "Surfing":                       1.1,   # Skilled sport; formula already captures wave/wind
-    "Travelling":                    1.2,   # Passenger vessels — moderate extra risk
-    "Naval Ships":                   0.4,   # Built for rough seas
-    "Merchant Ship":                 0.3,   # Large commercial vessels, highly stable
-    "Water Sports":                  1.4,   # Kayak/jet-ski: more exposed than surfing
-    "Deep Sea Travelling for Study": 0.5,   # Research vessels in open ocean
+    "Surfing":                       1.15,  # skilled but exposed
+    "Travelling":                    1.20,  # passenger vessels — moderate extra risk
+    "Naval Ships":                   0.80,  # military-grade, built for rough seas (was 0.4)
+    "Merchant Ship":                 0.75,  # large stable vessel (was 0.3 — way too low)
+    "Water Sports":                  1.40,  # kayak/jet-ski: most exposed
+    "Deep Sea Travelling for Study": 0.85,  # research vessels (was 0.5)
 }
 
 GLOBAL_SENSORS = [
@@ -215,12 +215,14 @@ async def verify_with_gemini(features: dict, raw_score: int, activity: str) -> d
 
     prompt = (
         "You are a certified marine safety expert. An ML model predicted a risk score.\n"
-        "Your job: INDEPENDENTLY assess the REAL risk based on ocean data, then CORRECT the ML score if wrong.\n\n"
+        "Your job: INDEPENDENTLY assess the REAL risk based on ocean data, then CORRECT the ML score only if clearly wrong.\n\n"
         "SCORING RUBRIC (use this, not the ML score):\n"
         "  1-3 SAFE    : wave < 1m, wind < 20km/h, current < 0.2m/s (calm conditions)\n"
-        "  4-6 CAUTION : wave 1-2.5m, wind 20-40km/h, or current 0.2-0.5m/s\n"
-        "  7-9 DANGER  : wave > 2.5m, wind > 40km/h, or current > 0.5m/s, or poor visibility\n"
+        "  4-6 CAUTION : wave 1-2.5m, wind 20-40km/h, OR current 0.2-0.5m/s\n"
+        "  7-9 DANGER  : wave > 2.5m, wind > 40km/h, OR current > 0.5m/s, OR poor visibility\n"
         "  10  EXTREME : wave > 4m, hurricane-force winds, tropical storm\n\n"
+        "IMPORTANT: Use OR logic. If ANY condition falls in a category, the score must meet that minimum.\n"
+        "Example: current=1.1 m/s alone → DANGER → score 7-9, regardless of calm waves/wind.\n\n"
         f"REAL SENSOR DATA:\n"
         f"  Wave height         : {h:.2f} m\n"
         f"  Wave period         : {p:.1f} s  (longer = safer)\n"
@@ -232,9 +234,9 @@ async def verify_with_gemini(features: dict, raw_score: int, activity: str) -> d
         f"  Water temperature   : {sst_label}\n"
         f"  Activity            : {activity}\n"
         f"  ML model predicted  : {raw_score}/10\n\n"
-        "INSTRUCTION: Apply the rubric above to the REAL data. "
-        "If ML score seems too high or too low given the actual conditions, CORRECT it. "
-        "Be especially careful — if waves < 1m and wind < 20 km/h, the score should NOT exceed 5 for most activities.\n\n"
+        "INSTRUCTION: Apply the rubric using OR logic to the REAL data. "
+        "The ML model now also uses this rubric, so corrections should only be needed for edge cases. "
+        "If waves < 1m AND wind < 20 km/h AND current < 0.2 m/s, score must be 1-3.\n\n"
         "Respond ONLY with valid JSON (no markdown, no explanation outside JSON):\n"
         '{"verified_score":<1-10>,"confidence":"<high|medium|low>",'
         '"explanation":"<one sentence stating key conditions and why score was set>","correction_made":<true|false>}'
@@ -402,18 +404,43 @@ def compute_score(features: dict, activity: str) -> int:
     multiplier = ACTIVITY_MULTIPLIERS.get(activity, 1.0)
     raw_scaled = base * multiplier
 
-    # Tiered safety floor based on actual wave severity.
-    # Prevents capable-vessel multipliers from masking genuinely extreme conditions.
-    #   >4m waves (Southern Ocean storm)  -> floor at 80% of base -> minimum 8/10 DANGER
-    #   >2.5m waves OR >40km/h wind       -> floor at 50% of base -> minimum 5/10 CAUTION
-    if base > 7.0:
-        if h > 4.0:
-            floor = base * 0.80   # truly extreme: Southern Ocean 5m -> 8/10 min (DANGER)
-        elif h > 2.5 or w > 40.0:
-            floor = base * 0.60   # significant: North Sea / Black Sea -> 6/10 min (CAUTION)
-        else:
-            floor = base * 0.40   # high base driven by current/vis/cold, not waves
-        raw_scaled = max(raw_scaled, floor)
+    # ── Gemini-aligned absolute floors (applied AFTER activity multiplier) ───────
+    # Matches Gemini's OR-logic rubric exactly: a single dangerous condition forces
+    # a minimum score that any vessel must respect — activity type cannot mask it.
+    #
+    #   SAFE    (1-3) : wave<1m  & wind<20km/h & current<0.2 m/s
+    #   CAUTION (4-6) : wave 1-2.5m OR wind 20-40km/h OR current 0.2-0.5 m/s
+    #   DANGER  (7-9) : wave>2.5m OR wind>40km/h OR current>0.5 m/s OR poor vis
+    #   EXTREME (10)  : wave>4m OR hurricane-force winds OR tropical storm
+    gemini_floor = 1.0
+
+    # Ocean current floors — most commonly under-scored by additive formula
+    if   c >= 1.2:   gemini_floor = max(gemini_floor, 8.5)
+    elif c >= 0.9:   gemini_floor = max(gemini_floor, 7.5)
+    elif c >= 0.5:   gemini_floor = max(gemini_floor, 5.5)
+    elif c >= 0.2:   gemini_floor = max(gemini_floor, 3.0)
+
+    # Wave height floors
+    if   h >= 4.0:   gemini_floor = max(gemini_floor, 9.0)
+    elif h >= 2.5:   gemini_floor = max(gemini_floor, 7.0)
+    elif h >= 1.5:   gemini_floor = max(gemini_floor, 5.0)
+    elif h >= 1.0:   gemini_floor = max(gemini_floor, 4.0)
+
+    # Wind speed floors (km/h)
+    if   w >= 60:    gemini_floor = max(gemini_floor, 8.5)
+    elif w >= 40:    gemini_floor = max(gemini_floor, 6.5)
+    elif w >= 20:    gemini_floor = max(gemini_floor, 3.5)
+
+    # Visibility floors
+    if   v < 1.0:   gemini_floor = max(gemini_floor, 8.0)
+    elif v < 3.0:   gemini_floor = max(gemini_floor, 6.0)
+    elif v < 6.0:   gemini_floor = max(gemini_floor, 4.0)
+
+    # Compound danger: wave + current together are worse than either alone
+    if   h >= 1.5 and c >= 0.3:   gemini_floor = max(gemini_floor, 6.0)
+    elif h >= 1.0 and c >= 0.2:   gemini_floor = max(gemini_floor, 4.0)
+
+    raw_scaled = max(raw_scaled, gemini_floor)
 
     return max(1, min(10, round(raw_scaled)))
 
@@ -581,6 +608,8 @@ async def scan_all():
 
 # ─── Continuous background scan every 20s ───
 async def continuous_scan():
+    # Defer first scan to let the server become responsive immediately
+    await asyncio.sleep(3)
     while True:
         try:
             await scan_all()
